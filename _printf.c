@@ -1,47 +1,43 @@
 #include "main.h"
-#include <unistd.h>
 /**
- * _printf - Emulate the original.
+ * _printf - Print all this parameters
+ * @format: input
  *
- * @format: Format by specifier.
+ * Description: function that prints output
  *
- * Return: count of chars.
+ * Return: The output character or num
  */
 int _printf(const char *format, ...)
 {
-	int i = 0, count = 0, count_fun;
-	va_list args;
+	int x = 0, o_p = 0;
+	char *ptr = (char *) format, *output_p;
+	int (*ptr_func)(va_list, char *, int);
+	va_list vlist;
 
-	va_start(args, format);
-	if (!format || (format[0] == '%' && !format[1]))
+	if (!format)
 		return (-1);
-	if (format[0] == '%' && format[1] == ' ' && !format[2])
-		return (-1);
-	while (format[i])
+	va_start(vlist, format);
+	output_p = malloc(sizeof(char) * SIZE);
+	if (!output_p)
+		return (1);
+	while (format[x])
 	{
-		count_fun = 0;
-		if (format[i] == '%')
+		if (format[x] != '%')
+			output_p[o_p] = format[x], o_p++;
+		else if (s_trlen(ptr) != 1)
 		{
-			if (!format[i + 1] || (format[i + 1] == ' ' && !format[i + 2]))
-			{
-				count = -1;
-				break;
-			}
-			count_fun += get_function(format[i + 1], args);
-			if (count_fun == 0)
-				count += _putchar(format[i + 1]);
-			if (count_fun == -1)
-				count = -1;
-			i++;
+			ptr_func = format_type(++ptr);
+			if (!ptr_func)
+				output_p[o_p] = format[x], o_p++;
+			else
+				o_p = ptr_func(vlist, output_p, o_p), x++;
 		}
 		else
-		{
-			(count == -1) ? (_putchar(format[i])) : (count += _putchar(format[i]));
-		}
-		i++;
-		if (count != -1)
-			count += count_fun;
+			o_p = -1;
+		x++, ptr++;
 	}
-	va_end(args);
-	return (count);
+	va_end(vlist);
+	write(1, output_p, o_p);
+	free(output_p);
+	return (o_p);
 }
